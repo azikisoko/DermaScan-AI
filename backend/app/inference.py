@@ -44,9 +44,8 @@ def predict(image: Image.Image):
     model = get_model()
     processed = preprocess_image(image)
 
-    # Fix: pass as a dict matching the actual input layer name
-    input_name = model.input_names[0]
-    predictions = model.predict({input_name: processed}, verbose=0)[0]
+    # Use numpy array directly — no input_names needed
+    predictions = model(processed, training=False).numpy()[0]
 
     predicted_index = int(np.argmax(predictions))
     predicted_class = CLASS_NAMES[predicted_index]

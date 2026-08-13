@@ -18,9 +18,10 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name=LAST_CONV_LAYER_
     )
 
     with tf.GradientTape() as tape:
-        # Fix: pass as dict matching input layer name
-        input_name = model.input_names[0]
-        conv_outputs, predictions = grad_model({input_name: img_array})
+        # Pass numpy array directly
+        img_tensor = tf.cast(img_array, tf.float32)
+        tape.watch(img_tensor)
+        conv_outputs, predictions = grad_model(img_tensor, training=False)
         class_idx = tf.argmax(predictions[0])
         loss = predictions[:, class_idx]
 
