@@ -22,7 +22,7 @@ def get_model():
 
 def preprocess_image(image: Image.Image) -> np.ndarray:
     image = image.convert("RGB").resize(IMG_SIZE)
-    arr = np.array(image) / 255.0
+    arr = np.array(image, dtype=np.float32) / 255.0
     return np.expand_dims(arr, axis=0)
 
 
@@ -43,7 +43,10 @@ def get_explanation(pred_class: str, confidence: float) -> str:
 def predict(image: Image.Image):
     model = get_model()
     processed = preprocess_image(image)
-    predictions = model.predict(processed)[0]
+
+    # Fix: pass as a dict matching the actual input layer name
+    input_name = model.input_names[0]
+    predictions = model.predict({input_name: processed}, verbose=0)[0]
 
     predicted_index = int(np.argmax(predictions))
     predicted_class = CLASS_NAMES[predicted_index]

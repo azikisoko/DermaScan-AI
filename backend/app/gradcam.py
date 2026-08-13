@@ -13,12 +13,14 @@ from app.inference import preprocess_image
 
 def make_gradcam_heatmap(img_array, model, last_conv_layer_name=LAST_CONV_LAYER_NAME):
     grad_model = tf.keras.models.Model(
-        [model.inputs],
-        [model.get_layer(last_conv_layer_name).output, model.output],
+        inputs=model.inputs,
+        outputs=[model.get_layer(last_conv_layer_name).output, model.output],
     )
 
     with tf.GradientTape() as tape:
-        conv_outputs, predictions = grad_model(img_array)
+        # Fix: pass as dict matching input layer name
+        input_name = model.input_names[0]
+        conv_outputs, predictions = grad_model({input_name: img_array})
         class_idx = tf.argmax(predictions[0])
         loss = predictions[:, class_idx]
 
